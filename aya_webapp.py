@@ -39,7 +39,7 @@ st.title("🎀 アヤとおしゃべりしよ！")
 # ------------------------------
 # 💫 ElevenLabs API Key 設定
 # ------------------------------
-ELEVENLABS_API_KEY = "ここにAPIキーを貼る"
+ELEVENLABS_API_KEY = "sk_51f7f0a7767cdbf62730a70f4ea541293f43e8895ad116a8"
 set_api_key(ELEVENLABS_API_KEY)
 
 if "messages" not in st.session_state:
