@@ -4,11 +4,11 @@ from elevenlabs import generate, set_api_key
 import tempfile
 
 # ------------------------------
-# 🔒 Secrets から APIキー取得
+# 🔹 Secrets から APIキー取得
 # ------------------------------
 ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY")
 if not ELEVENLABS_API_KEY:
-    st.error("ElevenLabs APIキーが設定されていません。CloudのSecretsを確認してね。")
+    st.error("ElevenLabs APIキーが設定されていません。Secretsを確認してね。")
     st.stop()
 set_api_key(ELEVENLABS_API_KEY)
 
@@ -56,7 +56,7 @@ user_input = st.chat_input("アヤに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role":"user","content":user_input})
     
-    # デモ用に反転返答
+    # デモ用：文字を反転して返答
     reply = f"アヤ: {user_input[::-1]} って感じかな〜💖"
     st.session_state["messages"].append({"role":"assistant","content":reply})
     st.session_state["last_reply"] = reply
@@ -69,7 +69,7 @@ for msg in st.session_state["messages"]:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
 
 # ------------------------------
-# 🔊 音声再生
+# 🔊 音声再生（ElevenLabs TTS）
 # ------------------------------
 if st.button("🎵 アヤの声を聞く"):
     if "last_reply" in st.session_state:
