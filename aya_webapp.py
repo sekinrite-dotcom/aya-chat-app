@@ -87,7 +87,7 @@ if st.button("🎵 アヤの声を聞く"):
         # TTS生成
         speech = client.audio.speech.create(
             model="gpt-4o-mini-tts",
-            voice="verse",
+            voice="aria",
             input=st.session_state["last_reply"]
         )
         audio_bytes = speech.read()
@@ -98,3 +98,4 @@ if st.button("🎵 アヤの声を聞く"):
             tmp_path = tmp.name
 
         st.audio(tmp_path, format="audio/mp3")
+
