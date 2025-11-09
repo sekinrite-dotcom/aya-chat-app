@@ -1,13 +1,14 @@
 import streamlit as st
 from openai import OpenAI
 import io
+import tempfile
 
 # ------------------------------
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
 
-PASSWORD = "yuto4325"
+PASSWORD = "aya_love"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -87,7 +88,9 @@ if user_input:
     reply = response.choices[0].message.content
     st.session_state["messages"].append({"role": "assistant", "content": reply})
 
-    # 音声生成
+    # ------------------------------
+    # 🔊 音声生成（スマホ対応：一時ファイルに保存）
+    # ------------------------------
     speech = client.audio.speech.create(
         model="gpt-4o-mini-tts",
         voice="alloy",
@@ -95,8 +98,12 @@ if user_input:
     )
     audio_bytes = speech.read()
 
-    # 🔊 再生バーを表示（スマホでも必ず押して再生できる）
-    st.audio(io.BytesIO(audio_bytes), format="audio/mp3")  # start_timeは不要
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+        tmp.write(audio_bytes)
+        tmp_path = tmp.name
+
+    # スマホでも確実に再生できる
+    st.audio(tmp_path, format="audio/mp3")
 
 # ------------------------------
 # 💬 会話表示
