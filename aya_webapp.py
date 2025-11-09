@@ -7,7 +7,7 @@ import tempfile
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
 
-PASSWORD = "aya_love"
+PASSWORD = "yuto4325"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -80,14 +80,14 @@ for msg in st.session_state["messages"][1:]:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
 
 # ------------------------------
-# 🔊 音声再生ボタン
+# 🔊 音声再生ボタン（女の子声）
 # ------------------------------
 if st.button("🎵 アヤの声を聞く"):
-    if "last_reply" in st.session_state:
-        # TTS生成
+    if st.session_state.get("last_reply", "").strip() != "":
+        # TTS生成（verseで少女っぽい声）
         speech = client.audio.speech.create(
             model="gpt-4o-mini-tts",
-            voice="aria",
+            voice="verse",
             input=st.session_state["last_reply"]
         )
         audio_bytes = speech.read()
@@ -98,4 +98,3 @@ if st.button("🎵 アヤの声を聞く"):
             tmp_path = tmp.name
 
         st.audio(tmp_path, format="audio/mp3")
-
