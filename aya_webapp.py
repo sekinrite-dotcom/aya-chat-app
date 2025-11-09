@@ -2,7 +2,11 @@ import streamlit as st
 from openai import OpenAI
 
 # OpenAIのAPIキーを設定
-client = OpenAI(api_key="ここに自分のAPIキーを入れてね")
+import os
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 st.set_page_config(page_title="アヤとおしゃべり", page_icon="🎀")
 st.title("🎀 アヤとおしゃべりしよ！")
@@ -35,3 +39,4 @@ for msg in st.session_state["messages"][1:]:
         st.chat_message("user").write(msg["content"])
     else:
         st.chat_message("assistant").write(msg["content"])
+
