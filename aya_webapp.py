@@ -1,6 +1,5 @@
 import streamlit as st
 from openai import OpenAI
-import io
 import tempfile
 
 # ------------------------------
@@ -8,16 +7,12 @@ import tempfile
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
 
-PASSWORD = "yuto4325"
+PASSWORD = "yuto0906"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    st.markdown(
-        "<h2 style='text-align:center; color:#ff7eb9;'>🎀 アヤの秘密の部屋 🎀</h2>",
-        unsafe_allow_html=True
-    )
     password_input = st.text_input("パスワードを入力してね💬", type="password")
     if st.button("ログイン"):
         if password_input == PASSWORD:
@@ -29,7 +24,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ------------------------------
-# 💖 背景＆文字＆吹き出しデザイン（文字黒固定）
+# 💖 背景＆文字＆吹き出しデザイン
 # ------------------------------
 st.markdown(
     """
@@ -38,12 +33,8 @@ st.markdown(
         background: linear-gradient(180deg, #ffe6f2 0%, #fff0f6 100%);
     }
     [data-testid="stHeader"] { background: rgba(255, 255, 255, 0); }
-    .stChatMessage {
-        border-radius: 20px !important;
-        padding: 10px;
-        background-color: #fff0f5 !important;
-        color: #000000 !important;
-    }
+    .stChatMessage { border-radius: 20px !important; padding: 10px;
+        background-color: #fff0f5 !important; color: #000000 !important; }
     .stMarkdown, .stText { color: #000000 !important; }
     </style>
     """,
@@ -59,18 +50,17 @@ client = OpenAI()
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"}
+        {"role": "system", "content": "明るくてフレンドリーな関西弁の女子学生『アヤ』として会話してください。"}
     ]
 
 # ------------------------------
 # 💬 ユーザー入力
 # ------------------------------
-user_input = st.chat_input("アヤに話しかけてみてな💬")
-
+user_input = st.chat_input("アヤに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
 
-    # テキスト返答
+    # AIのテキスト返答
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=st.session_state["messages"]
@@ -78,31 +68,7 @@ if user_input:
     reply = response.choices[0].message.content
     st.session_state["messages"].append({"role": "assistant", "content": reply})
 
-# ------------------------------
-# 🔊 アヤの声を聞くボタン
-# ------------------------------
-if st.button("🎵 アヤの声を聞く"):
-    # 最新のアヤの返答を取得
-    last_reply = ""
-    for msg in reversed(st.session_state["messages"]):
-        if msg["role"] == "assistant":
-            last_reply = msg["content"]
-            break
-
-    if last_reply:
-        speech = client.audio.speech.create(
-            model="gpt-4o-mini-tts",
-            voice="alloy",
-            input=last_reply
-        )
-        audio_bytes = speech.read()
-
-        # 一時ファイルに保存して再生
-        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
-            tmp.write(audio_bytes)
-            tmp_path = tmp.name
-
-        st.audio(tmp_path, format="audio/mp3")
+    st.session_state["last_reply"] = reply  # 最新の返答を保存
 
 # ------------------------------
 # 💬 会話表示
@@ -112,3 +78,23 @@ for msg in st.session_state["messages"][1:]:
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
+
+# ------------------------------
+# 🔊 音声再生ボタン
+# ------------------------------
+if st.button("🎵 アヤの声を聞く"):
+    if "last_reply" in st.session_state:
+        # TTS生成
+        speech = client.audio.speech.create(
+            model="gpt-4o-mini-tts",
+            voice="bella",
+            input=st.session_state["last_reply"]
+        )
+        audio_bytes = speech.read()
+
+        # 一時ファイルに保存して再生
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+            tmp.write(audio_bytes)
+            tmp_path = tmp.name
+
+        st.audio(tmp_path, format="audio/mp3")
