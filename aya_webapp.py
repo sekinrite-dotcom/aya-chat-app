@@ -5,16 +5,16 @@ import openai
 # ------------------------------
 # 🔹 OpenAI API Key を Secrets から取得
 # ------------------------------
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+openai.api_key = st.secrets.get("OPENAI_API_KEY")
 if not openai.api_key:
-    st.error("OpenAI APIキーが設定されていません。Secretsを確認してね。")
+    st.error("OpenAI APIキーが設定されていません。Secrets を確認してね。")
     st.stop()
 
 # ------------------------------
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "yuto0906"
+PASSWORD = "aya_love"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -55,14 +55,18 @@ if user_input:
     st.session_state["messages"].append({"role":"user","content":user_input})
     
     # 🔹 最新 API に対応した OpenAI 呼び出し
-    response = openai.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"},
-            *[{"role": m["role"], "content": m["content"]} for m in st.session_state["messages"]]
-        ]
-    )
-    reply = response.choices[0].message.content
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"},
+                *[{"role": m["role"], "content": m["content"]} for m in st.session_state["messages"]]
+            ]
+        )
+        reply = response.choices[0].message.content
+    except Exception as e:
+        reply = "ごめん💦 今アヤはちょっとお休み中やね…"
+
     st.session_state["messages"].append({"role":"assistant","content":reply})
     st.session_state["last_reply"] = reply
 
