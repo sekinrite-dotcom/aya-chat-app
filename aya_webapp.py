@@ -14,7 +14,7 @@ if not openai.api_key:
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "aya_love"
+PASSWORD = "yuto4325"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -76,3 +76,4 @@ for msg in st.session_state["messages"]:
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
+
