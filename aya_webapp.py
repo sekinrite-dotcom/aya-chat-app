@@ -29,20 +29,27 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ------------------------------
-# 💖 メイン画面
+# 💖 背景＆文字＆吹き出しデザイン
 # ------------------------------
 st.markdown(
     """
     <style>
+    /* 背景ピンク */
     [data-testid="stAppViewContainer"] {
         background: linear-gradient(180deg, #ffe6f2 0%, #fff0f6 100%);
+        color: #000000 !important;  /* 文字を黒く */
     }
+
     [data-testid="stHeader"] {
         background: rgba(255, 255, 255, 0);
     }
+
+    /* 吹き出しデザイン */
     .stChatMessage {
         border-radius: 20px !important;
         padding: 10px;
+        color: #000000 !important;
+        background-color: #fff0f5 !important;
     }
     </style>
     """,
@@ -51,25 +58,25 @@ st.markdown(
 
 st.title("🎀 アヤとおしゃべりしよ！")
 
-# APIクライアント
+# ------------------------------
+# 💫 OpenAI設定
+# ------------------------------
 client = OpenAI()
 
-# 会話履歴の初期化
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {
-            "role": "system",
-            "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"
-        }
+        {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"}
     ]
 
-# チャット入力欄
+# ------------------------------
+# 💬 ユーザー入力
+# ------------------------------
 user_input = st.chat_input("アヤに話しかけてみてな💬")
 
 if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
 
-    # テキスト返信
+    # テキスト返答
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=st.session_state["messages"]
@@ -83,11 +90,14 @@ if user_input:
         voice="alloy",
         input=reply
     )
-
     audio_bytes = speech.read()
-    st.audio(io.BytesIO(audio_bytes), format="audio/mp3")
 
-# 会話表示
+    # スマホでも再生できるように再生バーを表示
+    st.audio(io.BytesIO(audio_bytes), format="audio/mp3", start_time=0)
+
+# ------------------------------
+# 💬 会話表示
+# ------------------------------
 for msg in st.session_state["messages"][1:]:
     if msg["role"] == "user":
         st.chat_message("user", avatar="👤").write(msg["content"])
