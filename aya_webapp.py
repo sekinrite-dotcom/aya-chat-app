@@ -1,6 +1,5 @@
 import streamlit as st
 from openai import OpenAI
-import base64
 import io
 
 # ------------------------------
@@ -29,7 +28,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ------------------------------
-# 💖 背景＆文字＆吹き出しデザイン
+# 💖 背景＆文字＆吹き出しデザイン（文字黒固定）
 # ------------------------------
 st.markdown(
     """
@@ -37,7 +36,6 @@ st.markdown(
     /* 背景ピンク */
     [data-testid="stAppViewContainer"] {
         background: linear-gradient(180deg, #ffe6f2 0%, #fff0f6 100%);
-        color: #000000 !important;  /* 文字を黒く */
     }
 
     [data-testid="stHeader"] {
@@ -48,8 +46,13 @@ st.markdown(
     .stChatMessage {
         border-radius: 20px !important;
         padding: 10px;
-        color: #000000 !important;
         background-color: #fff0f5 !important;
+        color: #000000 !important;  /* ← 文字を黒 */
+    }
+
+    /* markdownやテキストも黒 */
+    .stMarkdown, .stText {
+        color: #000000 !important;
     }
     </style>
     """,
@@ -92,8 +95,8 @@ if user_input:
     )
     audio_bytes = speech.read()
 
-    # スマホでも再生できるように再生バーを表示
-    st.audio(io.BytesIO(audio_bytes), format="audio/mp3", start_time=0)
+    # 🔊 再生バーを表示（スマホでも必ず押して再生できる）
+    st.audio(io.BytesIO(audio_bytes), format="audio/mp3")  # start_timeは不要
 
 # ------------------------------
 # 💬 会話表示
