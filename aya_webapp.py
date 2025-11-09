@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import openai
-import tempfile
 
 # ------------------------------
 # 🔹 OpenAI API Key を Secrets から取得
@@ -15,7 +14,7 @@ if not openai.api_key:
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "yuto4325"
+PASSWORD = "yuto0906"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -55,11 +54,11 @@ user_input = st.chat_input("アヤに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role":"user","content":user_input})
     
-    # OpenAI API で応答
-    response = openai.ChatCompletion.create(
+    # 🔹 最新 API に対応した OpenAI 呼び出し
+    response = openai.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role":"system","content":"あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"},
+            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"},
             *[{"role": m["role"], "content": m["content"]} for m in st.session_state["messages"]]
         ]
     )
