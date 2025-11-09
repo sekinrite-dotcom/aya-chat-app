@@ -7,7 +7,7 @@ import tempfile
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
 
-PASSWORD = "yuto0906"
+PASSWORD = "aya_love"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -87,7 +87,7 @@ if st.button("🎵 アヤの声を聞く"):
         # TTS生成
         speech = client.audio.speech.create(
             model="gpt-4o-mini-tts",
-            voice="bella",
+            voice="alloy",
             input=st.session_state["last_reply"]
         )
         audio_bytes = speech.read()
