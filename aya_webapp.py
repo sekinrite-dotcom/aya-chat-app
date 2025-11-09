@@ -8,7 +8,7 @@ import tempfile
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
 
-PASSWORD = "yuto4325"
+PASSWORD = "yuto0906"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -113,4 +113,5 @@ for msg in st.session_state["messages"][1:]:
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
+
 
