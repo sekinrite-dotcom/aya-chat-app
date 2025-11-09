@@ -1,6 +1,16 @@
 import streamlit as st
+import os
 from elevenlabs import generate, set_api_key
 import tempfile
+
+# ------------------------------
+# 🔒 Secrets から APIキー取得
+# ------------------------------
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY")
+if not ELEVENLABS_API_KEY:
+    st.error("ElevenLabs APIキーが設定されていません。CloudのSecretsを確認してね。")
+    st.stop()
+set_api_key(ELEVENLABS_API_KEY)
 
 # ------------------------------
 # 🔒 パスワード認証
@@ -37,17 +47,11 @@ st.markdown("""
 st.title("🎀 アヤとおしゃべりしよ！")
 
 # ------------------------------
-# 💫 ElevenLabs API Key 設定
+# 💬 会話管理
 # ------------------------------
-ELEVENLABS_API_KEY = "sk_51f7f0a7767cdbf62730a70f4ea541293f43e8895ad116a8"
-set_api_key(ELEVENLABS_API_KEY)
-
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
-# ------------------------------
-# 💬 ユーザー入力
-# ------------------------------
 user_input = st.chat_input("アヤに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role":"user","content":user_input})
@@ -57,9 +61,7 @@ if user_input:
     st.session_state["messages"].append({"role":"assistant","content":reply})
     st.session_state["last_reply"] = reply
 
-# ------------------------------
-# 💬 会話表示
-# ------------------------------
+# 会話表示
 for msg in st.session_state["messages"]:
     if msg["role"]=="user":
         st.chat_message("user", avatar="👤").write(msg["content"])
@@ -67,13 +69,13 @@ for msg in st.session_state["messages"]:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
 
 # ------------------------------
-# 🔊 ElevenLabs TTS 再生
+# 🔊 音声再生
 # ------------------------------
 if st.button("🎵 アヤの声を聞く"):
     if "last_reply" in st.session_state:
         audio_bytes = generate(
             text=st.session_state["last_reply"],
-            voice="alloy_female",  # ← 好きな女の子声に変更可能
+            voice="alloy_female",  # 女の子っぽい声
             model="eleven_monolingual_v1"
         )
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
