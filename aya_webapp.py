@@ -1,13 +1,12 @@
 import streamlit as st
-from openai import OpenAI
+from elevenlabs import generate, set_api_key, stream
 import tempfile
 
 # ------------------------------
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
-
-PASSWORD = "yuto4325"
+PASSWORD = "aya_love"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -24,77 +23,61 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ------------------------------
-# 💖 背景＆文字＆吹き出しデザイン
+# 💖 背景＆文字デザイン
 # ------------------------------
-st.markdown(
-    """
-    <style>
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(180deg, #ffe6f2 0%, #fff0f6 100%);
-    }
-    [data-testid="stHeader"] { background: rgba(255, 255, 255, 0); }
-    .stChatMessage { border-radius: 20px !important; padding: 10px;
-        background-color: #fff0f5 !important; color: #000000 !important; }
-    .stMarkdown, .stText { color: #000000 !important; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+[data-testid="stAppViewContainer"] { background: linear-gradient(180deg,#ffe6f2 0%,#fff0f6 100%); }
+.stChatMessage { border-radius: 20px !important; padding: 10px;
+    background-color: #fff0f5 !important; color: #000000 !important; }
+.stMarkdown, .stText { color: #000000 !important; }
+</style>
+""", unsafe_allow_html=True)
 
 st.title("🎀 アヤとおしゃべりしよ！")
 
 # ------------------------------
-# 💫 OpenAI設定
+# 💫 ElevenLabs API Key 設定
 # ------------------------------
-client = OpenAI()
+ELEVENLABS_API_KEY = "sk_51f7f0a7767cdbf62730a70f4ea541293f43e8895ad116a8"
+set_api_key(ELEVENLABS_API_KEY)
 
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "system", "content": "明るくてフレンドリーな関西弁の女子学生『アヤ』として会話してください。"}
-    ]
+    st.session_state["messages"] = []
 
 # ------------------------------
 # 💬 ユーザー入力
 # ------------------------------
 user_input = st.chat_input("アヤに話しかけてみて💬")
 if user_input:
-    st.session_state["messages"].append({"role": "user", "content": user_input})
-
-    # AIのテキスト返答
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=st.session_state["messages"]
-    )
-    reply = response.choices[0].message.content
-    st.session_state["messages"].append({"role": "assistant", "content": reply})
-
-    st.session_state["last_reply"] = reply  # 最新の返答を保存
+    st.session_state["messages"].append({"role":"user","content":user_input})
+    
+    # ここではデモとして文字反転で返答
+    reply = f"アヤ: {user_input[::-1]} って感じかな〜💖"
+    st.session_state["messages"].append({"role":"assistant","content":reply})
+    st.session_state["last_reply"] = reply
 
 # ------------------------------
 # 💬 会話表示
 # ------------------------------
-for msg in st.session_state["messages"][1:]:
-    if msg["role"] == "user":
+for msg in st.session_state["messages"]:
+    if msg["role"]=="user":
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
 
 # ------------------------------
-# 🔊 音声再生ボタン（女の子声）
+# 🔊 ElevenLabs TTS 再生
 # ------------------------------
 if st.button("🎵 アヤの声を聞く"):
-    if st.session_state.get("last_reply", "").strip() != "":
-        # TTS生成（verseで少女っぽい声）
-        speech = client.audio.speech.create(
-            model="gpt-4o-mini-tts",
-            voice="verse",
-            input=st.session_state["last_reply"]
+    if "last_reply" in st.session_state:
+        audio_bytes = generate(
+            text=st.session_state["last_reply"],
+            voice="alloy_female",  # ← ElevenLabsの女の子声に変更可能
+            model="eleven_monolingual_v1"
         )
-        audio_bytes = speech.read()
-
         # 一時ファイルに保存して再生
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             tmp.write(audio_bytes)
             tmp_path = tmp.name
-
         st.audio(tmp_path, format="audio/mp3")
