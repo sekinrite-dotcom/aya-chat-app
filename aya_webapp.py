@@ -1,5 +1,5 @@
 import streamlit as st
-from elevenlabs import generate, set_api_key, stream
+from elevenlabs import generate, set_api_key
 import tempfile
 
 # ------------------------------
@@ -39,7 +39,7 @@ st.title("🎀 アヤとおしゃべりしよ！")
 # ------------------------------
 # 💫 ElevenLabs API Key 設定
 # ------------------------------
-ELEVENLABS_API_KEY = "sk_51f7f0a7767cdbf62730a70f4ea541293f43e8895ad116a8"
+ELEVENLABS_API_KEY = "ここにAPIキーを貼る"
 set_api_key(ELEVENLABS_API_KEY)
 
 if "messages" not in st.session_state:
@@ -52,7 +52,7 @@ user_input = st.chat_input("アヤに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role":"user","content":user_input})
     
-    # ここではデモとして文字反転で返答
+    # デモ用に反転返答
     reply = f"アヤ: {user_input[::-1]} って感じかな〜💖"
     st.session_state["messages"].append({"role":"assistant","content":reply})
     st.session_state["last_reply"] = reply
@@ -73,10 +73,9 @@ if st.button("🎵 アヤの声を聞く"):
     if "last_reply" in st.session_state:
         audio_bytes = generate(
             text=st.session_state["last_reply"],
-            voice="alloy_female",  # ← ElevenLabsの女の子声に変更可能
+            voice="alloy_female",  # ← 好きな女の子声に変更可能
             model="eleven_monolingual_v1"
         )
-        # 一時ファイルに保存して再生
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             tmp.write(audio_bytes)
             tmp_path = tmp.name
