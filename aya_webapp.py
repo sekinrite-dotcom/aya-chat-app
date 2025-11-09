@@ -1,42 +1,78 @@
 import streamlit as st
 from openai import OpenAI
+import base64
 
-# OpenAIのAPIキーを設定
-import os
-from openai import OpenAI
+# -------------------------
+# 🌸 設定
+# -------------------------
+st.set_page_config(page_title="アヤとおしゃべり🎤", page_icon="🎀")
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# パスワード設定（任意）
+PASSWORD = "yuto4325"
 
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
 
-st.set_page_config(page_title="アヤとおしゃべり", page_icon="🎀")
-st.title("🎀 アヤとおしゃべりしよ！")
+if not st.session_state.authenticated:
+    st.markdown("### 💬 アヤに会うにはパスワードが必要やで！")
+    pw = st.text_input("🔑 パスワードを入れてな", type="password")
+    if st.button("ログイン"):
+        if pw == PASSWORD:
+            st.session_state.authenticated = True
+            st.success("ようこそっ！アヤやで〜💖")
+        else:
+            st.error("ちゃうで、それやない💦")
+    st.stop()
 
-# 会話履歴を保持
+# -------------------------
+# 💫 OpenAI設定
+# -------------------------
+client = OpenAI()
+
+st.title("🎀 アヤとおしゃべり（関西弁ver）🎀")
+st.markdown("明るくてフレンドリーな関西弁女子・アヤがしゃべってくれるで〜✨")
+
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"}
+    st.session_state.messages = [
+        {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として話します。"}
     ]
 
-# 入力欄
-user_input = st.chat_input("アヤに話しかけてみよ！")
+# -------------------------
+# 💬 入力と表示
+# -------------------------
+for msg in st.session_state.messages:
+    if msg["role"] != "system":
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
-if user_input:
-    # ユーザーのメッセージを保存
-    st.session_state["messages"].append({"role": "user", "content": user_input})
+if prompt := st.chat_input("なんでも話してな〜💞"):
+    st.chat_message("user").markdown(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # OpenAI API呼び出し
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=st.session_state["messages"]
-    )
+    # 🤖 GPTの返答
+    with st.chat_message("assistant", avatar="https://i.imgur.com/Ef8G2oE.png"):
+        with st.spinner("アヤが考え中やで...💭"):
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=st.session_state.messages
+            )
+            reply = response.choices[0].message.content
+            st.markdown(reply)
 
-    reply = response.choices[0].message.content
-    st.session_state["messages"].append({"role": "assistant", "content": reply})
+            st.session_state.messages.append({"role": "assistant", "content": reply})
 
-# 会話表示
-for msg in st.session_state["messages"][1:]:
-    if msg["role"] == "user":
-        st.chat_message("user").write(msg["content"])
-    else:
-        st.chat_message("assistant").write(msg["content"])
+            # 🔊 音声合成（TTS）
+            audio_response = client.audio.speech.create(
+                model="gpt-4o-mini-tts",
+                voice="alloy",  # 声の種類：他にも"verse"や"aria"などある
+                input=reply,
+            )
 
+            audio_bytes = audio_response.read()
+            audio_base64 = base64.b64encode(audio_bytes).decode()
+            audio_html = f"""
+            <audio autoplay controls>
+                <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+            </audio>
+            """
+            st.markdown(audio_html, unsafe_allow_html=True)
