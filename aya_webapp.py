@@ -85,12 +85,11 @@ for msg in st.session_state["messages"][1:]:
 if st.button("🎵 アヤの声を聞く"):
     if "last_reply" in st.session_state:
         # TTS生成
-       speech = client.audio.speech.create(
-    model="gpt-4o-mini-tts",
-    voice="verse",  # ← ここを変える
-    input=st.session_state["last_reply"]
-)
-
+        speech = client.audio.speech.create(
+            model="gpt-4o-mini-tts",
+            voice="chorus",
+            input=st.session_state["last_reply"]
+        )
         audio_bytes = speech.read()
 
         # 一時ファイルに保存して再生
@@ -99,4 +98,3 @@ if st.button("🎵 アヤの声を聞く"):
             tmp_path = tmp.name
 
         st.audio(tmp_path, format="audio/mp3")
-
