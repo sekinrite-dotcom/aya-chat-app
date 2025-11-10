@@ -82,9 +82,42 @@ user_input = st.chat_input("あかねに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
 
-    # OpenAIで返信生成
+    # ✅ OpenAIで返信生成（←ここを修正済み）
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『あかね』として話してください。"},
-            *st.*
+            *st.session_state["messages"]
+        ]
+    )
+
+    reply = response.choices[0].message.content
+    st.session_state["messages"].append({"role": "assistant", "content": reply})
+    st.session_state["last_reply"] = reply
+
+    # 保存
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(st.session_state["messages"], f, ensure_ascii=False, indent=2)
+
+# ------------------------------
+# 💬 会話表示
+# ------------------------------
+for msg in st.session_state["messages"]:
+    if msg["role"] == "user":
+        st.chat_message("user", avatar="👤").write(msg["content"])
+    else:
+        st.chat_message("assistant", avatar="akane_icon.png").write(msg["content"])
+
+# ------------------------------
+# 🔊 音声再生（ElevenLabs）
+# ------------------------------
+if st.button("🎵 あかねの声を聞く"):
+    if "last_reply" in st.session_state:
+        audio = generate(
+            text=st.session_state["last_reply"],
+            voice="YXlfyhF0F8QjaOOX7Gb3",  # ← あかねのVoice ID
+            model="eleven_monolingual_v1"
+        )
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+            tmp.write(audio)
+            st.audio(tmp.name, format="audio/mp3")
