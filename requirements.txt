@@ -1,4 +1,5 @@
 streamlit
 openai
-elevenlabs
+elevenlabs>=0.3.0
+
 
