@@ -1,87 +1,40 @@
-<<<<<<< HEAD
-import streamlit as st
-from openai import OpenAI
-
-# OpenAIのAPIキーを設定
-client = OpenAI(api_key="ここに自分のAPIキーを入れてね")
-
-st.set_page_config(page_title="アヤとおしゃべり", page_icon="🎀")
-st.title("🎀 アヤとおしゃべりしよ！")
-
-# 会話履歴を保持
-if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"}
-    ]
-
-# 入力欄
-user_input = st.chat_input("アヤに話しかけてみよ！")
-
-if user_input:
-    # ユーザーのメッセージを保存
-    st.session_state["messages"].append({"role": "user", "content": user_input})
-
-    # OpenAI API呼び出し
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=st.session_state["messages"]
-    )
-
-    reply = response.choices[0].message.content
-    st.session_state["messages"].append({"role": "assistant", "content": reply})
-
-# 会話表示
-for msg in st.session_state["messages"][1:]:
-    if msg["role"] == "user":
-        st.chat_message("user").write(msg["content"])
-    else:
-        st.chat_message("assistant").write(msg["content"])
-=======
 import streamlit as st
 import os
 import json
 from openai import OpenAI
-from elevenlabs import generate, set_api_key
-import tempfile
 
 # ------------------------------
-# 🔹 APIキー設定
+# 🔹 OpenAI API Key
 # ------------------------------
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY")
-
 if not OPENAI_API_KEY:
-    st.error("❌ OpenAI APIキーが設定されていません。")
-    st.stop()
-if not ELEVENLABS_API_KEY:
-    st.error("❌ ElevenLabs APIキーが設定されていません。")
+    st.error("OpenAI APIキーが設定されていません。Secretsを確認してね。")
     st.stop()
 
 client = OpenAI(api_key=OPENAI_API_KEY)
-set_api_key(ELEVENLABS_API_KEY)
 
 # ------------------------------
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 あかねとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "akane_love"
+PASSWORD = "aya_love"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    pw = st.text_input("パスワードを入力してね💬", type="password")
+    password_input = st.text_input("パスワードを入力してね💬", type="password")
     if st.button("ログイン"):
-        if pw == PASSWORD:
+        if password_input == PASSWORD:
             st.session_state.authenticated = True
-            st.success("やっほ〜！あかねやでっ💖")
+            st.success("ようこそっ！あかねやで〜💖")
             st.rerun()
         else:
             st.error("ちがうで〜😢 もう一回やってみて！")
     st.stop()
 
 # ------------------------------
-# 💖 デザイン設定
+# 💖 背景＆文字デザイン
 # ------------------------------
 st.markdown("""
 <style>
@@ -94,19 +47,17 @@ st.markdown("""
     background-color: #fff0f5 !important;
     color: #000000 !important;
 }
-h1 {
-    font-size: 1.6rem !important;
-    color: #ff66aa !important;
-}
+.stMarkdown, .stText { color: #000000 !important; }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🎀 あかねとおしゃべりしよ！")
 
 # ------------------------------
-# 💬 会話履歴
+# 💬 会話履歴ファイル
 # ------------------------------
 HISTORY_FILE = "chat_history.json"
+
 if "messages" not in st.session_state:
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r", encoding="utf-8") as f:
@@ -121,20 +72,19 @@ user_input = st.chat_input("あかねに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
 
-    # ✅ OpenAIで返信生成（←ここを修正済み）
+    # 新APIで応答生成
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『あかね』として話してください。"},
+            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『あかね』として会話します。"},
             *st.session_state["messages"]
         ]
     )
 
     reply = response.choices[0].message.content
     st.session_state["messages"].append({"role": "assistant", "content": reply})
-    st.session_state["last_reply"] = reply
 
-    # 保存
+    # 会話を保存
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state["messages"], f, ensure_ascii=False, indent=2)
 
@@ -145,19 +95,4 @@ for msg in st.session_state["messages"]:
     if msg["role"] == "user":
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
-        st.chat_message("assistant", avatar="akane_icon.png").write(msg["content"])
-
-# ------------------------------
-# 🔊 音声再生（ElevenLabs）
-# ------------------------------
-if st.button("🎵 あかねの声を聞く"):
-    if "last_reply" in st.session_state:
-        audio = generate(
-            text=st.session_state["last_reply"],
-            voice="YXlfyhF0F8QjaOOX7Gb3",  # ← あかねのVoice ID
-            model="eleven_monolingual_v1"
-        )
-        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
-            tmp.write(audio)
-            st.audio(tmp.name, format="audio/mp3")
->>>>>>> 948e7e8188d636e6c01c5c187d91c365f6f89507
+        st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
