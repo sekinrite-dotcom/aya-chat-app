@@ -2,24 +2,16 @@ import streamlit as st
 import os
 import json
 from openai import OpenAI
-from elevenlabs import generate, set_api_key, play  # 追加
 
 # ------------------------------
-# 🔹 APIキー設定
+# 🔹 OpenAI API Key
 # ------------------------------
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY")  # 追加
-
 if not OPENAI_API_KEY:
     st.error("OpenAI APIキーが設定されていません。Secretsを確認してね。")
     st.stop()
 
-if not ELEVENLABS_API_KEY:
-    st.error("ElevenLabs APIキーが設定されていません。Secretsを確認してね。")
-    st.stop()
-
 client = OpenAI(api_key=OPENAI_API_KEY)
-set_api_key(ELEVENLABS_API_KEY)  # ElevenLabs APIキーセット
 
 # ------------------------------
 # 🔒 パスワード認証
@@ -56,6 +48,12 @@ st.markdown("""
     color: #000000 !important;
 }
 .stMarkdown, .stText { color: #000000 !important; }
+
+/* 🎀 タイトルを少し小さく */
+h1 {
+    font-size: 1.5rem !important;
+    text-align: center;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -92,14 +90,6 @@ if user_input:
     reply = response.choices[0].message.content
     st.session_state["messages"].append({"role": "assistant", "content": reply})
 
-    # ElevenLabsで音声生成・再生
-    audio = generate(
-        text=reply,
-        voice="YX_lfyhF0F8QjaOOX7Gb3",  # あかね用のVoiceID
-        model="eleven_multilingual_v1"
-    )
-    play(audio)  # ブラウザで再生
-
     # 会話を保存
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state["messages"], f, ensure_ascii=False, indent=2)
@@ -111,4 +101,4 @@ for msg in st.session_state["messages"]:
     if msg["role"] == "user":
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
-        st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
+        st.chat_message("assistant", avatar="akane_icon.png").write(msg["content"])
