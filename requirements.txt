@@ -1,3 +1,1 @@
-openai
-streamlit
-elevenlabs
+openaistreamlitelevenlabs
