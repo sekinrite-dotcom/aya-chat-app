@@ -1,21 +1,23 @@
 import streamlit as st
 import os
-import openai
 import json
+from openai import OpenAI
 
 # ------------------------------
-# 🔹 OpenAI API Key を Secrets から取得
+# 🔹 OpenAI API Key
 # ------------------------------
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-if not openai.api_key:
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
     st.error("OpenAI APIキーが設定されていません。Secretsを確認してね。")
     st.stop()
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # ------------------------------
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "aya_love"
+PASSWORD = "yuto4325"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -36,9 +38,15 @@ if not st.session_state.authenticated:
 # ------------------------------
 st.markdown("""
 <style>
-[data-testid="stAppViewContainer"] { background: linear-gradient(180deg,#ffe6f2 0%,#fff0f6 100%); }
-.stChatMessage { border-radius: 20px !important; padding: 10px;
-    background-color: #fff0f5 !important; color: #000000 !important; }
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(180deg,#ffe6f2 0%,#fff0f6 100%);
+}
+.stChatMessage {
+    border-radius: 20px !important;
+    padding: 10px;
+    background-color: #fff0f5 !important;
+    color: #000000 !important;
+}
 .stMarkdown, .stText { color: #000000 !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -50,7 +58,6 @@ st.title("🎀 アヤとおしゃべりしよ！")
 # ------------------------------
 HISTORY_FILE = "chat_history.json"
 
-# ファイルから履歴をロード
 if "messages" not in st.session_state:
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r", encoding="utf-8") as f:
@@ -63,20 +70,21 @@ if "messages" not in st.session_state:
 # ------------------------------
 user_input = st.chat_input("アヤに話しかけてみて💬")
 if user_input:
-    st.session_state["messages"].append({"role":"user","content":user_input})
+    st.session_state["messages"].append({"role": "user", "content": user_input})
 
-    # OpenAI API で応答
-    response = openai.ChatCompletion.create(
+    # 新APIで応答生成
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role":"system","content":"あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"},
-            *[{"role": m["role"], "content": m["content"]} for m in st.session_state["messages"]]
+            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"},
+            *st.session_state["messages"]
         ]
     )
-    reply = response.choices[0].message.content
-    st.session_state["messages"].append({"role":"assistant","content":reply})
 
-    # 履歴をファイルに保存
+    reply = response.choices[0].message.content
+    st.session_state["messages"].append({"role": "assistant", "content": reply})
+
+    # 会話を保存
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state["messages"], f, ensure_ascii=False, indent=2)
 
@@ -84,7 +92,7 @@ if user_input:
 # 💬 会話表示
 # ------------------------------
 for msg in st.session_state["messages"]:
-    if msg["role"]=="user":
+    if msg["role"] == "user":
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
         st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
