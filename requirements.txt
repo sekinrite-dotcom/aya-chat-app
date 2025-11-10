@@ -1,5 +1,4 @@
 openai
 streamlit
-elevenlabs==0.2.5
-
-
+elevenlabs
+pydantic>=2.1.1
