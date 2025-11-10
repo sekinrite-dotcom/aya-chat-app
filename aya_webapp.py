@@ -16,8 +16,8 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # ------------------------------
 # 🔒 パスワード認証
 # ------------------------------
-st.set_page_config(page_title="🎀 アヤとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "yuto4325"
+st.set_page_config(page_title="🎀 あかねとおしゃべり", page_icon="🎀", layout="centered")
+PASSWORD = "aya_love"
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -27,7 +27,7 @@ if not st.session_state.authenticated:
     if st.button("ログイン"):
         if password_input == PASSWORD:
             st.session_state.authenticated = True
-            st.success("ようこそっ！アヤやで〜💖")
+            st.success("ようこそっ！あかねやで〜💖")
             st.rerun()
         else:
             st.error("ちがうで〜😢 もう一回やってみて！")
@@ -48,10 +48,16 @@ st.markdown("""
     color: #000000 !important;
 }
 .stMarkdown, .stText { color: #000000 !important; }
+
+/* 🎀 タイトルを少し小さく */
+h1 {
+    font-size: 1.5rem !important;
+    text-align: center;
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎀 アヤとおしゃべりしよ！")
+st.title("🎀 あかねとおしゃべりしよ！")
 
 # ------------------------------
 # 💬 会話履歴ファイル
@@ -68,7 +74,7 @@ if "messages" not in st.session_state:
 # ------------------------------
 # 💬 ユーザー入力
 # ------------------------------
-user_input = st.chat_input("アヤに話しかけてみて💬")
+user_input = st.chat_input("あかねに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
 
@@ -76,7 +82,7 @@ if user_input:
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『アヤ』として会話します。"},
+            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『あかね』として会話します。"},
             *st.session_state["messages"]
         ]
     )
@@ -95,4 +101,4 @@ for msg in st.session_state["messages"]:
     if msg["role"] == "user":
         st.chat_message("user", avatar="👤").write(msg["content"])
     else:
-        st.chat_message("assistant", avatar="aya_icon.png").write(msg["content"])
+        st.chat_message("assistant", avatar="akane_icon.png").write(msg["content"])
