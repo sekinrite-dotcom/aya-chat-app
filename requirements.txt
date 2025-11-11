@@ -1,8 +1,2 @@
-openai
-streamlit
-HEAD
-elevenlabs
-
-
-elevenlabs
-9e532fc (Add elevenlabs to requirements)
+streamlit>=1.25.0
+openai>=1.0.0
