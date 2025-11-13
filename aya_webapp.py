@@ -17,7 +17,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 あかねとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "aya_love"  # ←好きに変えてOK！
+PASSWORD = "yuto4325"  # ←好きに変えてOK！
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
