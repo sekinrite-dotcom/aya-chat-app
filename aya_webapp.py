@@ -17,7 +17,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # 🔒 パスワード認証
 # ------------------------------
 st.set_page_config(page_title="🎀 あかねとおしゃべり", page_icon="🎀", layout="centered")
-PASSWORD = "yuto4325"
+PASSWORD = "aya_love"  # ←好きに変えてOK！
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -27,7 +27,7 @@ if not st.session_state.authenticated:
     if st.button("ログイン"):
         if password_input == PASSWORD:
             st.session_state.authenticated = True
-            st.success("ようこそっ！あかねやで〜💖")
+            st.success("やっほー！あかねやで💖")
             st.rerun()
         else:
             st.error("ちがうで〜😢 もう一回やってみて！")
@@ -48,10 +48,8 @@ st.markdown("""
     color: #000000 !important;
 }
 .stMarkdown, .stText { color: #000000 !important; }
-
-/* 🎀 タイトルを少し小さく */
 h1 {
-    font-size: 1.5rem !important;
+    font-size: 1.6rem !important;
     text-align: center;
 }
 </style>
@@ -60,7 +58,7 @@ h1 {
 st.title("🎀 あかねとおしゃべりしよ！")
 
 # ------------------------------
-# 💬 会話履歴ファイル
+# 💬 会話履歴の保存
 # ------------------------------
 HISTORY_FILE = "chat_history.json"
 
@@ -78,11 +76,10 @@ user_input = st.chat_input("あかねに話しかけてみて💬")
 if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
 
-    # 新APIで応答生成
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "あなたは明るくてフレンドリーな関西弁の女子学生『あかね』として会話します。"},
+            {"role": "system", "content": "あなたは明るくて関西弁の女子学生『あかね』として、友達のように自然に会話します。"},
             *st.session_state["messages"]
         ]
     )
@@ -90,7 +87,7 @@ if user_input:
     reply = response.choices[0].message.content
     st.session_state["messages"].append({"role": "assistant", "content": reply})
 
-    # 会話を保存
+    # 💾 会話履歴を保存
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state["messages"], f, ensure_ascii=False, indent=2)
 
